@@ -1,0 +1,13 @@
+
+1. pins ✔️
+2. assert ✔️
+3. isr ✔️
+4. uart ✔️
+5. ir remote ✔️ 
+6. pwm motor driver ✔️ 
+7. adc line sensors ✔️
+8. range sensors 
+9. timer 
+10. state machine 
+11. PCB board 
+12. CAD design 
