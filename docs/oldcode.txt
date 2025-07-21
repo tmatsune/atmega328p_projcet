@@ -1,4 +1,18 @@
-#include "adc.h"
+/*
+#ifndef GP2Y_H
+#define GP2Y_H
+#include <Arduino.h>
+
+#define RANGE_COUNT 3 
+typedef int range_values[RANGE_COUNT];
+
+void get_range_values(range_values vals);
+
+#endif 
+*/
+
+
+/*
 
 #define NUM_CHANNELS 4                                      // Number of ADC channels to sample
 volatile uint16_t adc_values[NUM_CHANNELS];                      // Store ADC results
@@ -15,13 +29,6 @@ void adc_init(){
     ADCSRA |= (1 << ADSC);                                  // Start ADC conversion
 }
 
-void get_adc_input_values(adc_input_values vals){
-    vals[0] = adc_values[0];
-    vals[1] = adc_values[1];
-    vals[2] = adc_values[2];
-    vals[3] = adc_values[3];
-}
-
 ISR(ADC_vect) {
     adc_values[current_channel] = ADC;                      // Store ADC result
     current_channel++;  
@@ -32,3 +39,34 @@ ISR(ADC_vect) {
     ADMUX = (ADMUX & 0xF8) | current_channel;               // Switch ADC channel
     ADCSRA |= (1 << ADSC);                                  // Start new conversion
 }
+
+*/
+
+/*
+#ifndef ADC_H
+#define ADC_H 
+#include <Arduino.h>
+
+#define ADC_COUNT 4
+typedef int line_sensor_vals[ADC_COUNT];
+void get_line_sensor_vals(line_sensor_vals vals);
+
+#endif
+
+
+void adc_init(void);
+
+adc_input_values adc_vals;
+get_adc_input_values(adc_vals);
+int front_left = adc_vals[2];
+
+val[0] = pin A3
+val[1] = pin A0 
+val[2] = pin A1
+val[3] = pin A2
+*/
+
+
+
+
+

@@ -1,37 +1,32 @@
 #include <Arduino.h>
 #include <stdbool.h>
 #include "drivers/mcu_init.h"
-#include "drivers/pins.h"
 #include "drivers/pwm.h"
-#include "drivers/adc.h"
-#include "app/drive.h"
-#include <IRremote.h>
+#include "app/timer.h"
+#include "app/statemachine.h"
 
-constexpr uint8_t IR_RECEIVE_PIN = 2;
-// Create an IR receiver instance
-IRrecv irrecv(IR_RECEIVE_PIN);
-decode_results results;
+StateMachine state_machine;
 
 void setup() {
-  Serial.begin(9600);
-  Serial.println("Microcontroller Init");
-  sei();
-  //mcu_init();
-  //pins_config();
-  //pwm_init();
-  //adc_init();
-  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+
+  mcu_init();
+  pwm_init();
+  ir_remote_init();
+  state_machine.init();
 }
 
 void loop() {
 
-    if (IrReceiver.decode()) {
-        // Print the received IR code
-        Serial.print("Received IR code: 0x");
-        Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
-        // Resume to listen for the next code
-        IrReceiver.resume();
-    }
-
+  state_machine.run();
+  delay(200);
 }
 
+/*
+  enemy_pos_e enemy = get_enemy_pos();
+  ir_command_e cmd = get_ir_command();
+  line_pos_e line_pos = get_line_pos();
+  if (enemy != ENEMY_POS_NONE) { print_enemy(enemy); }
+  if (cmd != CMD_NONE) { print_command(cmd); }
+  if(line_pos != LINE_NONE) {print_line_pos(line_pos); }
+  delay(200);
+*/
