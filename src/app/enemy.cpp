@@ -46,7 +46,7 @@ bool enemy_at_right(enemy_pos_e enemy)
     || enemy == ENEMY_POS_FRONT_AND_FRONT_RIGHT;
 }
 
-bool enmey_at_front(enemy_pos_e enemy)
+bool enemy_at_front(enemy_pos_e enemy)
 {
     return enemy == ENEMY_POS_FRONT \
     || enemy == ENEMY_POS_FRONT_ALL;

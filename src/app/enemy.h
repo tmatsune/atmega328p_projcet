@@ -21,7 +21,7 @@ typedef enum {
 enemy_pos_e get_enemy_pos(void);
 bool enemy_at_left(enemy_pos_e enemy);
 bool enemy_at_right(enemy_pos_e enemy);
-bool enmey_at_front(enemy_pos_e enemy);
+bool enemy_at_front(enemy_pos_e enemy);
 bool enemy_detected(enemy_pos_e enemy);
 
 //void print_enemy(enemy_pos_e enemy);

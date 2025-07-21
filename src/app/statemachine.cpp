@@ -1,25 +1,28 @@
 #include "statemachine.h"
 #include "common/assert_handler.h"
 
-void print_state(state_e state)
+/*
+const char *get_state(state_e state)
 {
-    if (state == STATE_WAIT) Serial.println("WAIT");
-    else if (state == STATE_SEARCH) Serial.println("SRCH");
-    else if (state == STATE_ATTACK) Serial.println("ATK");
-    else if (state == STATE_RETREAT) Serial.println("RETREAT");
-    else if (state == STATE_MANUAL) Serial.println("MANUAL");
+    if (state == STATE_WAIT) return "WAIT";
+    else if (state == STATE_SEARCH) return "SRCH";
+    else if (state == STATE_ATTACK) return "ATK";
+    else if (state == STATE_RETREAT) return "RETREAT";
+    else if (state == STATE_MANUAL) return "MANUAL";
+    return "ERR STATE";
 }
 
-
-void print_event(state_event_e event)
+const char *get_event(state_event_e event)
 {
-    if (event == STATE_EVENT_TIMEOUT) Serial.println("TIMEOUT");
-    else if (event == STATE_EVENT_LINE) Serial.println("LINE");
-    else if (event == STATE_EVENT_ENEMY) Serial.println("ENEMY");
-    else if (event == STATE_EVENT_FINISHED) Serial.println("FINISHED");
-    else if (event == STATE_EVENT_COMMAND) Serial.println("CMD");
-    else if (event == STATE_EVENT_NONE) Serial.println("NONE");
+    if (event == STATE_EVENT_TIMEOUT) return "TIMEOUT";
+    else if (event == STATE_EVENT_LINE) return "LINE";
+    else if (event == STATE_EVENT_ENEMY) return "ENEMY";
+    else if (event == STATE_EVENT_FINISHED) return "FINISHED";
+    else if (event == STATE_EVENT_COMMAND) return "CMD";
+    else if (event == STATE_EVENT_NONE) return "NONE";
+    return "ERR EVENT";
 }
+*/
 
 // Define state transitions
 const state_transition_s StateMachine::transitions[NUM_TRANSITIONS] = {
@@ -53,7 +56,7 @@ const state_transition_s StateMachine::transitions[NUM_TRANSITIONS] = {
     {STATE_MANUAL, STATE_EVENT_ENEMY,   STATE_MANUAL},
 };
 
-// --------------------- StateMachine ------------------------
+// --------------------- StateMachine ------------------------ //
 StateMachine::StateMachine()
     : currentState(STATE_WAIT), internalEvent(STATE_EVENT_NONE),
       timer(), enemy(ENEMY_POS_NONE), line(LINE_NONE), command(CMD_NONE) {
@@ -83,7 +86,7 @@ void StateMachine::init() {
 void StateMachine::run() {
     state_event_e event = processInput();
     processEvent(event);
-    print_state(this->currentState);
+    //char *curr_state = get_state(this->currentState);
 }
 
 state_event_e StateMachine::processInput() {
@@ -122,6 +125,15 @@ void StateMachine::stateEnter(state_e from, state_event_e event, state_e to) {
     }
 }
 
+void StateMachine::reset() {
+    timer_clear(timer);
+    internalEvent = STATE_EVENT_NONE;
+    currentState = STATE_WAIT;
+    enemy = ENEMY_POS_NONE;
+    line = LINE_NONE;
+    command = CMD_NONE;
+}
+
 bool StateMachine::hasInternalEvent() const {
     return internalEvent != STATE_EVENT_NONE;
 }
@@ -145,20 +157,17 @@ void StateSearch::init() {
 
 void StateSearch::enter(state_e from, state_event_e event) {
     if (from == STATE_WAIT) {
-        //ASSERT2(false, "Invalid transition from WAIT without COMMAND");
         run();
     } else if (from == STATE_ATTACK || from == STATE_RETREAT) {
         if (event == STATE_EVENT_NONE) {
-            //ASSERT2(from == STATE_ATTACK, "SEARCH_STATE_ENTER: NONE should only come from ATTACK");
             run();
         } else if (event == STATE_EVENT_FINISHED) {
-            //assert(from == STATE_RETREAT && "SEARCH_STATE_ENTER: FINISHED should only come from RETREAT");
             if (internalState == InternalSearchState::FORWARD) {
                 internalState = InternalSearchState::ROTATE;
             }
             run();
         } else {
-            //assert(false && "SEARCH_STATE_ENTER: Unexpected event from ATTACK/RETREAT");
+            
         }
     } else if (from == STATE_SEARCH) {
         if (event == STATE_EVENT_NONE) {
@@ -174,7 +183,7 @@ void StateSearch::enter(state_e from, state_event_e event) {
             //assert(false && "SEARCH_STATE_ENTER: Unexpected event from SEARCH");
         }
     } else if (from == STATE_MANUAL) {
-        // Do nothing
+
     }
 }
 
@@ -204,7 +213,7 @@ void StateAttack::enter(state_e from, state_event_e event) {
         if (event == STATE_EVENT_ENEMY) {
             run();
         } else {
-            //assert(false && "ATTACK: invalid event from SEARCH");
+            assert_handler_2("ATK: invld frm srch");
         }
     } else if (from == STATE_ATTACK) {
         if (event == STATE_EVENT_ENEMY) {
@@ -212,25 +221,21 @@ void StateAttack::enter(state_e from, state_event_e event) {
                 run();
             }
         } else if (event == STATE_EVENT_TIMEOUT) {
-            //assert(false && "ATTACK: TIMEOUT received, consider alternative handling");
+            //assert_handler_2("ATK received");
         } else {
-            //assert(false && "ATTACK: invalid event from ATTACK");
+            //assert_handler_2(false && "ATK: invalid event from ATTACK");
         }
-    } else if (from == STATE_RETREAT) {
-        //assert(false && "ATTACK: should not enter from RETREAT");
-    } else {
-        //assert(false && "ATTACK: invalid from state");
-    }
+    } else if (from == STATE_RETREAT) { } 
+    else { }
 }
 
 StateAttack::InternalAttackState StateAttack::nextAttackState(enemy_pos_e enemy) {
-    switch (enemy) {
-        case ENEMY_POS_FRONT: return InternalAttackState::FORWARD;
-        case ENEMY_POS_LEFT: return InternalAttackState::LEFT;
-        case ENEMY_POS_RIGHT: return InternalAttackState::RIGHT;
-        default: 
-        break;
-        //assert(false && "Invalid enemy position"); return InternalAttackState::FORWARD;
+    if (enemy_at_front(enemy)) {
+        return InternalAttackState::FORWARD;
+    } else if ( enemy_at_left(enemy) ) {
+        return InternalAttackState::LEFT;
+    } else if (enemy_at_right(enemy)) {
+        return InternalAttackState::RIGHT;
     }
     return InternalAttackState::FORWARD;
 }
@@ -241,10 +246,12 @@ void StateAttack::run() {
             drive_set(DRIVE_DIR_FORWARD, DRIVE_SPEED_MAX);
             break;
         case InternalAttackState::LEFT:
-            drive_set(DRIVE_DIR_ARCTURN_WIDE_LEFT, DRIVE_SPEED_MAX);
+            drive_set(DRIVE_DIR_ARCTURN_WIDE_LEFT, DRIVE_SPEED_MAX); 
+            //drive_set(DRIVE_DIR_ROTATE_LEFT, DRIVE_SPEED_MAX);
             break;
         case InternalAttackState::RIGHT:
-            drive_set(DRIVE_DIR_ARCTURN_WIDE_RIGHT, DRIVE_SPEED_MAX);
+            drive_set(DRIVE_DIR_ARCTURN_WIDE_RIGHT, DRIVE_SPEED_MAX); 
+            //drive_set(DRIVE_DIR_ROTATE_RIGHT, DRIVE_SPEED_MAX);
             break;
     }
     timer_start(stateMachine->getTimer(), 4000);
@@ -334,7 +341,6 @@ void StateRetreat::enter(state_e from, state_event_e event) {
     }
 }
 
-
 void StateRetreat::run() {
     moveIndex = 0;
     internalState = nextRetreatState();
@@ -343,7 +349,6 @@ void StateRetreat::run() {
 
 void StateRetreat::startRetreatMove() {
     const RetreatMove& sequence = retreatStates[static_cast<int>(internalState)];
-    //assert(moveIndex < sequence.moveCount);
 
     const Move& move = sequence.moves[moveIndex];
     drive_set(move.direction, move.speed);
@@ -445,7 +450,8 @@ void StateManual::enter(state_e from, state_event_e event) {
             drive_stop();
             break;
         case CMD_ZERO:
-            RESET;
+            drive_stop();
+            this->stateMachine->reset();
             break;
         default:
             break;

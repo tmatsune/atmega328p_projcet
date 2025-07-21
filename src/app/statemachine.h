@@ -6,7 +6,7 @@
 #include "timer.h"
 #include "drive.h"
 #include "drivers/ir_remote.h"
-#include "common/defines.h"
+#include "common/defines.h" 
 
 // -------- Enums and Structs -------- //
 typedef struct {
@@ -41,6 +41,7 @@ public:
     state_event_e processInput();
     void processEvent(state_event_e event);
     void stateEnter(state_e from, state_event_e event, state_e to);
+    void reset();
 
     void postInternalEvent(state_event_e e);
     bool hasInternalEvent() const;
