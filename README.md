@@ -41,7 +41,7 @@ The following schematic illustrates the full system, including sensor connection
 
 ## Software Highlights
 
-- **Language**: C (AVR-GCC)
+- **Language**: C++
 - **Control Architecture**:
   - Modular finite state machine (FSM) to handle autonomous behavior
   - Manual override with external interrupt for IR remote input
