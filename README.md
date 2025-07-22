@@ -31,7 +31,11 @@ This project is an **autonomous competitive sumo robot** built using the ATmega3
 | DC Motors                         | 2        | Locomotion                      |
 
 ---
-## Schematic
+## Circuit Schematic
+
+The following schematic illustrates the full system, including sensor connections, motor drivers, power regulation, and the ATmega32 microcontroller wiring:
+
+![Circuit Schematic](./docs/schematic.png)
 
 ---
 
